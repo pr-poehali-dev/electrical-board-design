@@ -127,6 +127,7 @@ const Index = () => {
     switch (type) {
       case 'breaker': return 'bg-blue-500';
       case 'rcd': return 'bg-green-500';
+      case 'rcbo': return 'bg-teal-500';
       case 'relay': return 'bg-yellow-500';
       case 'contactor': return 'bg-purple-500';
       case 'meter': return 'bg-orange-500';
@@ -169,10 +170,11 @@ const Index = () => {
           
           <ScrollArea className="flex-1 p-4">
             <Tabs defaultValue="all">
-              <TabsList className="w-full mb-4">
-                <TabsTrigger value="all" className="flex-1">Все</TabsTrigger>
-                <TabsTrigger value="protection" className="flex-1">Защита</TabsTrigger>
-                <TabsTrigger value="control" className="flex-1">Управление</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsTrigger value="all">Все</TabsTrigger>
+                <TabsTrigger value="breakers">Автоматы</TabsTrigger>
+                <TabsTrigger value="rcd">УЗО</TabsTrigger>
+                <TabsTrigger value="rcbo">Дифавтоматы</TabsTrigger>
               </TabsList>
               
               <TabsContent value="all" className="space-y-2">
@@ -207,40 +209,224 @@ const Index = () => {
                 ))}
               </TabsContent>
               
-              <TabsContent value="protection" className="space-y-2">
-                {DEVICE_LIBRARY.filter(d => d.type === 'breaker' || d.type === 'rcd').map((device) => (
-                  <Card
-                    key={device.id}
-                    className="p-3 cursor-pointer hover:bg-accent transition-colors"
-                    onClick={() => addDevice(device)}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-3">
-                        <div className={`w-10 h-10 rounded flex items-center justify-center ${getDeviceColor(device.type)}`}>
-                          <Icon name={device.icon as any} size={20} className="text-white" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="font-medium text-sm">{device.name}</p>
-                          <div className="flex gap-2 mt-1">
-                            <Badge variant="secondary" className="text-xs">
-                              {device.modules} мод.
-                            </Badge>
-                            {device.current && (
-                              <Badge variant="outline" className="text-xs">
-                                {device.current}A
-                              </Badge>
-                            )}
+              <TabsContent value="breakers" className="space-y-2">
+                <div className="mb-3">
+                  <p className="text-xs text-muted-foreground mb-2 font-medium">Характеристика B</p>
+                  <div className="space-y-2">
+                    {DEVICE_LIBRARY.filter(d => d.type === 'breaker' && d.characteristic === 'B').map((device) => (
+                      <Card
+                        key={device.id}
+                        className="p-3 cursor-pointer hover:bg-accent transition-colors"
+                        onClick={() => addDevice(device)}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start gap-3">
+                            <div className={`w-10 h-10 rounded flex items-center justify-center ${getDeviceColor(device.type)}`}>
+                              <Icon name={device.icon as any} size={20} className="text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-medium text-sm">{device.name}</p>
+                              <div className="flex gap-2 mt-1">
+                                <Badge variant="secondary" className="text-xs">
+                                  {device.modules} мод.
+                                </Badge>
+                                <Badge variant="outline" className="text-xs">
+                                  {device.current}A
+                                </Badge>
+                              </div>
+                            </div>
                           </div>
+                          <Icon name="Plus" size={16} className="text-muted-foreground" />
                         </div>
-                      </div>
-                      <Icon name="Plus" size={16} className="text-muted-foreground" />
-                    </div>
-                  </Card>
-                ))}
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+                
+                <Separator className="my-4" />
+                
+                <div className="mb-3">
+                  <p className="text-xs text-muted-foreground mb-2 font-medium">Характеристика C</p>
+                  <div className="space-y-2">
+                    {DEVICE_LIBRARY.filter(d => d.type === 'breaker' && d.characteristic === 'C' && d.modules === 1).map((device) => (
+                      <Card
+                        key={device.id}
+                        className="p-3 cursor-pointer hover:bg-accent transition-colors"
+                        onClick={() => addDevice(device)}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start gap-3">
+                            <div className={`w-10 h-10 rounded flex items-center justify-center ${getDeviceColor(device.type)}`}>
+                              <Icon name={device.icon as any} size={20} className="text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-medium text-sm">{device.name}</p>
+                              <div className="flex gap-2 mt-1">
+                                <Badge variant="secondary" className="text-xs">
+                                  {device.modules} мод.
+                                </Badge>
+                                <Badge variant="outline" className="text-xs">
+                                  {device.current}A
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                          <Icon name="Plus" size={16} className="text-muted-foreground" />
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+                
+                <Separator className="my-4" />
+                
+                <div className="mb-3">
+                  <p className="text-xs text-muted-foreground mb-2 font-medium">Характеристика D</p>
+                  <div className="space-y-2">
+                    {DEVICE_LIBRARY.filter(d => d.type === 'breaker' && d.characteristic === 'D').map((device) => (
+                      <Card
+                        key={device.id}
+                        className="p-3 cursor-pointer hover:bg-accent transition-colors"
+                        onClick={() => addDevice(device)}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start gap-3">
+                            <div className={`w-10 h-10 rounded flex items-center justify-center ${getDeviceColor(device.type)}`}>
+                              <Icon name={device.icon as any} size={20} className="text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-medium text-sm">{device.name}</p>
+                              <div className="flex gap-2 mt-1">
+                                <Badge variant="secondary" className="text-xs">
+                                  {device.modules} мод.
+                                </Badge>
+                                <Badge variant="outline" className="text-xs">
+                                  {device.current}A
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                          <Icon name="Plus" size={16} className="text-muted-foreground" />
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+                
+                <Separator className="my-4" />
+                
+                <div className="mb-3">
+                  <p className="text-xs text-muted-foreground mb-2 font-medium">Трёхполюсные (3P)</p>
+                  <div className="space-y-2">
+                    {DEVICE_LIBRARY.filter(d => d.type === 'breaker' && d.modules === 3).map((device) => (
+                      <Card
+                        key={device.id}
+                        className="p-3 cursor-pointer hover:bg-accent transition-colors"
+                        onClick={() => addDevice(device)}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start gap-3">
+                            <div className={`w-10 h-10 rounded flex items-center justify-center ${getDeviceColor(device.type)}`}>
+                              <Icon name={device.icon as any} size={20} className="text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-medium text-sm">{device.name}</p>
+                              <div className="flex gap-2 mt-1">
+                                <Badge variant="secondary" className="text-xs">
+                                  {device.modules} мод.
+                                </Badge>
+                                <Badge variant="outline" className="text-xs">
+                                  {device.current}A
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                          <Icon name="Plus" size={16} className="text-muted-foreground" />
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
               </TabsContent>
               
-              <TabsContent value="control" className="space-y-2">
-                {DEVICE_LIBRARY.filter(d => d.type === 'relay' || d.type === 'contactor' || d.type === 'meter').map((device) => (
+              <TabsContent value="rcd" className="space-y-2">
+                <div className="mb-3">
+                  <p className="text-xs text-muted-foreground mb-2 font-medium">Однофазные УЗО</p>
+                  <div className="space-y-2">
+                    {DEVICE_LIBRARY.filter(d => d.type === 'rcd' && d.modules === 2).map((device) => (
+                      <Card
+                        key={device.id}
+                        className="p-3 cursor-pointer hover:bg-accent transition-colors"
+                        onClick={() => addDevice(device)}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start gap-3">
+                            <div className={`w-10 h-10 rounded flex items-center justify-center ${getDeviceColor(device.type)}`}>
+                              <Icon name={device.icon as any} size={20} className="text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-medium text-sm">{device.name}</p>
+                              <div className="flex gap-2 mt-1">
+                                <Badge variant="secondary" className="text-xs">
+                                  {device.modules} мод.
+                                </Badge>
+                                <Badge variant="outline" className="text-xs">
+                                  {device.current}A
+                                </Badge>
+                                <Badge variant="outline" className="text-xs">
+                                  {device.leakage}мА
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                          <Icon name="Plus" size={16} className="text-muted-foreground" />
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+                
+                <Separator className="my-4" />
+                
+                <div className="mb-3">
+                  <p className="text-xs text-muted-foreground mb-2 font-medium">Трёхфазные УЗО (3P)</p>
+                  <div className="space-y-2">
+                    {DEVICE_LIBRARY.filter(d => d.type === 'rcd' && d.modules === 4).map((device) => (
+                      <Card
+                        key={device.id}
+                        className="p-3 cursor-pointer hover:bg-accent transition-colors"
+                        onClick={() => addDevice(device)}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start gap-3">
+                            <div className={`w-10 h-10 rounded flex items-center justify-center ${getDeviceColor(device.type)}`}>
+                              <Icon name={device.icon as any} size={20} className="text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-medium text-sm">{device.name}</p>
+                              <div className="flex gap-2 mt-1">
+                                <Badge variant="secondary" className="text-xs">
+                                  {device.modules} мод.
+                                </Badge>
+                                <Badge variant="outline" className="text-xs">
+                                  {device.current}A
+                                </Badge>
+                                <Badge variant="outline" className="text-xs">
+                                  {device.leakage}мА
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                          <Icon name="Plus" size={16} className="text-muted-foreground" />
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="rcbo" className="space-y-2">
+                {DEVICE_LIBRARY.filter(d => d.type === 'rcbo').map((device) => (
                   <Card
                     key={device.id}
                     className="p-3 cursor-pointer hover:bg-accent transition-colors"
@@ -257,11 +443,12 @@ const Index = () => {
                             <Badge variant="secondary" className="text-xs">
                               {device.modules} мод.
                             </Badge>
-                            {device.current && (
-                              <Badge variant="outline" className="text-xs">
-                                {device.current}A
-                              </Badge>
-                            )}
+                            <Badge variant="outline" className="text-xs">
+                              {device.current}A
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              {device.leakage}мА
+                            </Badge>
                           </div>
                         </div>
                       </div>
