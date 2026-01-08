@@ -10,11 +10,13 @@ import { Badge } from '@/components/ui/badge';
 interface Device {
   id: string;
   name: string;
-  type: 'breaker' | 'rcd' | 'relay' | 'contactor' | 'meter';
+  type: 'breaker' | 'rcd' | 'rcbo' | 'relay' | 'contactor' | 'meter';
   modules: number;
   current?: number;
   voltage?: number;
   icon: string;
+  characteristic?: string;
+  leakage?: number;
 }
 
 interface PlacedDevice extends Device {
@@ -22,12 +24,73 @@ interface PlacedDevice extends Device {
 }
 
 const DEVICE_LIBRARY: Device[] = [
-  { id: 'br-16', name: 'Автомат C16', type: 'breaker', modules: 1, current: 16, voltage: 230, icon: 'Zap' },
-  { id: 'br-25', name: 'Автомат C25', type: 'breaker', modules: 1, current: 25, voltage: 230, icon: 'Zap' },
-  { id: 'br-32', name: 'Автомат C32', type: 'breaker', modules: 2, current: 32, voltage: 230, icon: 'Zap' },
-  { id: 'br-40', name: 'Автомат C40', type: 'breaker', modules: 2, current: 40, voltage: 230, icon: 'Zap' },
-  { id: 'rcd-25', name: 'УЗО 25А 30мА', type: 'rcd', modules: 2, current: 25, voltage: 230, icon: 'Shield' },
-  { id: 'rcd-40', name: 'УЗО 40А 30мА', type: 'rcd', modules: 2, current: 40, voltage: 230, icon: 'Shield' },
+  { id: 'br-b6', name: 'Автомат B6', type: 'breaker', modules: 1, current: 6, voltage: 230, characteristic: 'B', icon: 'Zap' },
+  { id: 'br-b10', name: 'Автомат B10', type: 'breaker', modules: 1, current: 10, voltage: 230, characteristic: 'B', icon: 'Zap' },
+  { id: 'br-b16', name: 'Автомат B16', type: 'breaker', modules: 1, current: 16, voltage: 230, characteristic: 'B', icon: 'Zap' },
+  { id: 'br-b20', name: 'Автомат B20', type: 'breaker', modules: 1, current: 20, voltage: 230, characteristic: 'B', icon: 'Zap' },
+  { id: 'br-b25', name: 'Автомат B25', type: 'breaker', modules: 1, current: 25, voltage: 230, characteristic: 'B', icon: 'Zap' },
+  { id: 'br-b32', name: 'Автомат B32', type: 'breaker', modules: 1, current: 32, voltage: 230, characteristic: 'B', icon: 'Zap' },
+  { id: 'br-b40', name: 'Автомат B40', type: 'breaker', modules: 1, current: 40, voltage: 230, characteristic: 'B', icon: 'Zap' },
+  { id: 'br-b50', name: 'Автомат B50', type: 'breaker', modules: 1, current: 50, voltage: 230, characteristic: 'B', icon: 'Zap' },
+  { id: 'br-b63', name: 'Автомат B63', type: 'breaker', modules: 1, current: 63, voltage: 230, characteristic: 'B', icon: 'Zap' },
+  
+  { id: 'br-c6', name: 'Автомат C6', type: 'breaker', modules: 1, current: 6, voltage: 230, characteristic: 'C', icon: 'Zap' },
+  { id: 'br-c10', name: 'Автомат C10', type: 'breaker', modules: 1, current: 10, voltage: 230, characteristic: 'C', icon: 'Zap' },
+  { id: 'br-c16', name: 'Автомат C16', type: 'breaker', modules: 1, current: 16, voltage: 230, characteristic: 'C', icon: 'Zap' },
+  { id: 'br-c20', name: 'Автомат C20', type: 'breaker', modules: 1, current: 20, voltage: 230, characteristic: 'C', icon: 'Zap' },
+  { id: 'br-c25', name: 'Автомат C25', type: 'breaker', modules: 1, current: 25, voltage: 230, characteristic: 'C', icon: 'Zap' },
+  { id: 'br-c32', name: 'Автомат C32', type: 'breaker', modules: 1, current: 32, voltage: 230, characteristic: 'C', icon: 'Zap' },
+  { id: 'br-c40', name: 'Автомат C40', type: 'breaker', modules: 1, current: 40, voltage: 230, characteristic: 'C', icon: 'Zap' },
+  { id: 'br-c50', name: 'Автомат C50', type: 'breaker', modules: 1, current: 50, voltage: 230, characteristic: 'C', icon: 'Zap' },
+  { id: 'br-c63', name: 'Автомат C63', type: 'breaker', modules: 1, current: 63, voltage: 230, characteristic: 'C', icon: 'Zap' },
+  
+  { id: 'br-d6', name: 'Автомат D6', type: 'breaker', modules: 1, current: 6, voltage: 230, characteristic: 'D', icon: 'Zap' },
+  { id: 'br-d10', name: 'Автомат D10', type: 'breaker', modules: 1, current: 10, voltage: 230, characteristic: 'D', icon: 'Zap' },
+  { id: 'br-d16', name: 'Автомат D16', type: 'breaker', modules: 1, current: 16, voltage: 230, characteristic: 'D', icon: 'Zap' },
+  { id: 'br-d20', name: 'Автомат D20', type: 'breaker', modules: 1, current: 20, voltage: 230, characteristic: 'D', icon: 'Zap' },
+  { id: 'br-d25', name: 'Автомат D25', type: 'breaker', modules: 1, current: 25, voltage: 230, characteristic: 'D', icon: 'Zap' },
+  { id: 'br-d32', name: 'Автомат D32', type: 'breaker', modules: 1, current: 32, voltage: 230, characteristic: 'D', icon: 'Zap' },
+  { id: 'br-d40', name: 'Автомат D40', type: 'breaker', modules: 1, current: 40, voltage: 230, characteristic: 'D', icon: 'Zap' },
+  { id: 'br-d50', name: 'Автомат D50', type: 'breaker', modules: 1, current: 50, voltage: 230, characteristic: 'D', icon: 'Zap' },
+  { id: 'br-d63', name: 'Автомат D63', type: 'breaker', modules: 1, current: 63, voltage: 230, characteristic: 'D', icon: 'Zap' },
+  
+  { id: 'br-3p-c16', name: 'Автомат 3P C16', type: 'breaker', modules: 3, current: 16, voltage: 400, characteristic: 'C', icon: 'Zap' },
+  { id: 'br-3p-c25', name: 'Автомат 3P C25', type: 'breaker', modules: 3, current: 25, voltage: 400, characteristic: 'C', icon: 'Zap' },
+  { id: 'br-3p-c32', name: 'Автомат 3P C32', type: 'breaker', modules: 3, current: 32, voltage: 400, characteristic: 'C', icon: 'Zap' },
+  { id: 'br-3p-c40', name: 'Автомат 3P C40', type: 'breaker', modules: 3, current: 40, voltage: 400, characteristic: 'C', icon: 'Zap' },
+  { id: 'br-3p-c50', name: 'Автомат 3P C50', type: 'breaker', modules: 3, current: 50, voltage: 400, characteristic: 'C', icon: 'Zap' },
+  { id: 'br-3p-c63', name: 'Автомат 3P C63', type: 'breaker', modules: 3, current: 63, voltage: 400, characteristic: 'C', icon: 'Zap' },
+  
+  { id: 'rcd-16-10', name: 'УЗО 16А 10мА', type: 'rcd', modules: 2, current: 16, voltage: 230, leakage: 10, icon: 'Shield' },
+  { id: 'rcd-16-30', name: 'УЗО 16А 30мА', type: 'rcd', modules: 2, current: 16, voltage: 230, leakage: 30, icon: 'Shield' },
+  { id: 'rcd-25-10', name: 'УЗО 25А 10мА', type: 'rcd', modules: 2, current: 25, voltage: 230, leakage: 10, icon: 'Shield' },
+  { id: 'rcd-25-30', name: 'УЗО 25А 30мА', type: 'rcd', modules: 2, current: 25, voltage: 230, leakage: 30, icon: 'Shield' },
+  { id: 'rcd-40-10', name: 'УЗО 40А 10мА', type: 'rcd', modules: 2, current: 40, voltage: 230, leakage: 10, icon: 'Shield' },
+  { id: 'rcd-40-30', name: 'УЗО 40А 30мА', type: 'rcd', modules: 2, current: 40, voltage: 230, leakage: 30, icon: 'Shield' },
+  { id: 'rcd-63-30', name: 'УЗО 63А 30мА', type: 'rcd', modules: 2, current: 63, voltage: 230, leakage: 30, icon: 'Shield' },
+  { id: 'rcd-63-100', name: 'УЗО 63А 100мА', type: 'rcd', modules: 2, current: 63, voltage: 230, leakage: 100, icon: 'Shield' },
+  { id: 'rcd-80-30', name: 'УЗО 80А 30мА', type: 'rcd', modules: 2, current: 80, voltage: 230, leakage: 30, icon: 'Shield' },
+  { id: 'rcd-80-100', name: 'УЗО 80А 100мА', type: 'rcd', modules: 2, current: 80, voltage: 230, leakage: 100, icon: 'Shield' },
+  { id: 'rcd-100-100', name: 'УЗО 100А 100мА', type: 'rcd', modules: 2, current: 100, voltage: 230, leakage: 100, icon: 'Shield' },
+  { id: 'rcd-100-300', name: 'УЗО 100А 300мА', type: 'rcd', modules: 2, current: 100, voltage: 230, leakage: 300, icon: 'Shield' },
+  
+  { id: 'rcd-3p-40-30', name: 'УЗО 3P 40А 30мА', type: 'rcd', modules: 4, current: 40, voltage: 400, leakage: 30, icon: 'Shield' },
+  { id: 'rcd-3p-63-30', name: 'УЗО 3P 63А 30мА', type: 'rcd', modules: 4, current: 63, voltage: 400, leakage: 30, icon: 'Shield' },
+  { id: 'rcd-3p-63-100', name: 'УЗО 3P 63А 100мА', type: 'rcd', modules: 4, current: 63, voltage: 400, leakage: 100, icon: 'Shield' },
+  { id: 'rcd-3p-80-100', name: 'УЗО 3P 80А 100мА', type: 'rcd', modules: 4, current: 80, voltage: 400, leakage: 100, icon: 'Shield' },
+  { id: 'rcd-3p-100-100', name: 'УЗО 3P 100А 100мА', type: 'rcd', modules: 4, current: 100, voltage: 400, leakage: 100, icon: 'Shield' },
+  { id: 'rcd-3p-100-300', name: 'УЗО 3P 100А 300мА', type: 'rcd', modules: 4, current: 100, voltage: 400, leakage: 300, icon: 'Shield' },
+  
+  { id: 'rcbo-c6-30', name: 'Дифавтомат C6 30мА', type: 'rcbo', modules: 2, current: 6, voltage: 230, characteristic: 'C', leakage: 30, icon: 'ShieldCheck' },
+  { id: 'rcbo-c10-30', name: 'Дифавтомат C10 30мА', type: 'rcbo', modules: 2, current: 10, voltage: 230, characteristic: 'C', leakage: 30, icon: 'ShieldCheck' },
+  { id: 'rcbo-c16-10', name: 'Дифавтомат C16 10мА', type: 'rcbo', modules: 2, current: 16, voltage: 230, characteristic: 'C', leakage: 10, icon: 'ShieldCheck' },
+  { id: 'rcbo-c16-30', name: 'Дифавтомат C16 30мА', type: 'rcbo', modules: 2, current: 16, voltage: 230, characteristic: 'C', leakage: 30, icon: 'ShieldCheck' },
+  { id: 'rcbo-c20-30', name: 'Дифавтомат C20 30мА', type: 'rcbo', modules: 2, current: 20, voltage: 230, characteristic: 'C', leakage: 30, icon: 'ShieldCheck' },
+  { id: 'rcbo-c25-30', name: 'Дифавтомат C25 30мА', type: 'rcbo', modules: 2, current: 25, voltage: 230, characteristic: 'C', leakage: 30, icon: 'ShieldCheck' },
+  { id: 'rcbo-c32-30', name: 'Дифавтомат C32 30мА', type: 'rcbo', modules: 2, current: 32, voltage: 230, characteristic: 'C', leakage: 30, icon: 'ShieldCheck' },
+  { id: 'rcbo-c40-30', name: 'Дифавтомат C40 30мА', type: 'rcbo', modules: 2, current: 40, voltage: 230, characteristic: 'C', leakage: 30, icon: 'ShieldCheck' },
+  { id: 'rcbo-c50-30', name: 'Дифавтомат C50 30мА', type: 'rcbo', modules: 2, current: 50, voltage: 230, characteristic: 'C', leakage: 30, icon: 'ShieldCheck' },
+  
   { id: 'relay-16', name: 'Реле напряжения', type: 'relay', modules: 2, voltage: 230, icon: 'Activity' },
   { id: 'cont-25', name: 'Контактор 25А', type: 'contactor', modules: 2, current: 25, icon: 'Power' },
   { id: 'meter-1', name: 'Электросчётчик', type: 'meter', modules: 6, voltage: 230, icon: 'Gauge' },
