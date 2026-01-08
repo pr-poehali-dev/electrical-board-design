@@ -6,6 +6,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Device {
   id: string;
@@ -100,6 +102,10 @@ const Index = () => {
   const [placedDevices, setPlacedDevices] = useState<PlacedDevice[]>([]);
   const [selectedDevice, setSelectedDevice] = useState<PlacedDevice | null>(null);
   const [viewMode, setViewMode] = useState<'2d' | '3d'>('2d');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterCurrent, setFilterCurrent] = useState<string>('all');
+  const [filterVoltage, setFilterVoltage] = useState<string>('all');
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   const addDevice = (device: Device) => {
     const lastPosition = placedDevices.length > 0 
@@ -119,6 +125,46 @@ const Index = () => {
     setPlacedDevices(placedDevices.filter(d => d.id !== id));
     if (selectedDevice?.id === id) setSelectedDevice(null);
   };
+
+  const moveDevice = (fromIndex: number, toIndex: number) => {
+    const newDevices = [...placedDevices];
+    const [movedDevice] = newDevices.splice(fromIndex, 1);
+    newDevices.splice(toIndex, 0, movedDevice);
+    
+    let currentPosition = 0;
+    newDevices.forEach(device => {
+      device.position = currentPosition;
+      currentPosition += device.modules;
+    });
+    
+    setPlacedDevices(newDevices);
+  };
+
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent, toIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex !== null && draggedIndex !== toIndex) {
+      moveDevice(draggedIndex, toIndex);
+    }
+    setDraggedIndex(null);
+  };
+
+  const filteredDevices = DEVICE_LIBRARY.filter(device => {
+    const matchesSearch = device.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCurrent = filterCurrent === 'all' || device.current?.toString() === filterCurrent;
+    const matchesVoltage = filterVoltage === 'all' || device.voltage?.toString() === filterVoltage;
+    return matchesSearch && matchesCurrent && matchesVoltage;
+  });
+
+  const availableCurrents = Array.from(new Set(DEVICE_LIBRARY.map(d => d.current).filter(Boolean))).sort((a, b) => (a || 0) - (b || 0));
+  const availableVoltages = Array.from(new Set(DEVICE_LIBRARY.map(d => d.voltage).filter(Boolean))).sort((a, b) => (a || 0) - (b || 0));
 
   const totalModules = placedDevices.reduce((sum, d) => sum + d.modules, 0);
   const totalLoad = placedDevices.reduce((sum, d) => sum + (d.current || 0), 0);
@@ -166,6 +212,48 @@ const Index = () => {
               <Icon name="PackagePlus" size={18} />
               Библиотека устройств
             </h2>
+            
+            <div className="space-y-2">
+              <div className="relative">
+                <Icon name="Search" size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Поиск устройств..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9 h-9"
+                />
+              </div>
+              
+              <div className="flex gap-2">
+                <Select value={filterCurrent} onValueChange={setFilterCurrent}>
+                  <SelectTrigger className="h-9 flex-1">
+                    <SelectValue placeholder="Ток" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Все токи</SelectItem>
+                    {availableCurrents.map(current => (
+                      <SelectItem key={current} value={current!.toString()}>
+                        {current}A
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <Select value={filterVoltage} onValueChange={setFilterVoltage}>
+                  <SelectTrigger className="h-9 flex-1">
+                    <SelectValue placeholder="Напряжение" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Все напряж.</SelectItem>
+                    {availableVoltages.map(voltage => (
+                      <SelectItem key={voltage} value={voltage!.toString()}>
+                        {voltage}V
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
           
           <ScrollArea className="flex-1 p-4">
@@ -178,7 +266,13 @@ const Index = () => {
               </TabsList>
               
               <TabsContent value="all" className="space-y-2">
-                {DEVICE_LIBRARY.map((device) => (
+                {filteredDevices.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground text-sm">
+                    <Icon name="SearchX" size={32} className="mx-auto mb-2 opacity-50" />
+                    <p>Ничего не найдено</p>
+                  </div>
+                ) : (
+                  filteredDevices.map((device) => (
                   <Card
                     key={device.id}
                     className="p-3 cursor-pointer hover:bg-accent transition-colors"
@@ -206,14 +300,14 @@ const Index = () => {
                       <Icon name="Plus" size={16} className="text-muted-foreground" />
                     </div>
                   </Card>
-                ))}
+                )))}
               </TabsContent>
               
               <TabsContent value="breakers" className="space-y-2">
                 <div className="mb-3">
                   <p className="text-xs text-muted-foreground mb-2 font-medium">Характеристика B</p>
                   <div className="space-y-2">
-                    {DEVICE_LIBRARY.filter(d => d.type === 'breaker' && d.characteristic === 'B').map((device) => (
+                    {filteredDevices.filter(d => d.type === 'breaker' && d.characteristic === 'B').map((device) => (
                       <Card
                         key={device.id}
                         className="p-3 cursor-pointer hover:bg-accent transition-colors"
@@ -248,7 +342,7 @@ const Index = () => {
                 <div className="mb-3">
                   <p className="text-xs text-muted-foreground mb-2 font-medium">Характеристика C</p>
                   <div className="space-y-2">
-                    {DEVICE_LIBRARY.filter(d => d.type === 'breaker' && d.characteristic === 'C' && d.modules === 1).map((device) => (
+                    {filteredDevices.filter(d => d.type === 'breaker' && d.characteristic === 'C' && d.modules === 1).map((device) => (
                       <Card
                         key={device.id}
                         className="p-3 cursor-pointer hover:bg-accent transition-colors"
@@ -283,7 +377,7 @@ const Index = () => {
                 <div className="mb-3">
                   <p className="text-xs text-muted-foreground mb-2 font-medium">Характеристика D</p>
                   <div className="space-y-2">
-                    {DEVICE_LIBRARY.filter(d => d.type === 'breaker' && d.characteristic === 'D').map((device) => (
+                    {filteredDevices.filter(d => d.type === 'breaker' && d.characteristic === 'D').map((device) => (
                       <Card
                         key={device.id}
                         className="p-3 cursor-pointer hover:bg-accent transition-colors"
@@ -318,7 +412,7 @@ const Index = () => {
                 <div className="mb-3">
                   <p className="text-xs text-muted-foreground mb-2 font-medium">Трёхполюсные (3P)</p>
                   <div className="space-y-2">
-                    {DEVICE_LIBRARY.filter(d => d.type === 'breaker' && d.modules === 3).map((device) => (
+                    {filteredDevices.filter(d => d.type === 'breaker' && d.modules === 3).map((device) => (
                       <Card
                         key={device.id}
                         className="p-3 cursor-pointer hover:bg-accent transition-colors"
@@ -353,7 +447,7 @@ const Index = () => {
                 <div className="mb-3">
                   <p className="text-xs text-muted-foreground mb-2 font-medium">Однофазные УЗО</p>
                   <div className="space-y-2">
-                    {DEVICE_LIBRARY.filter(d => d.type === 'rcd' && d.modules === 2).map((device) => (
+                    {filteredDevices.filter(d => d.type === 'rcd' && d.modules === 2).map((device) => (
                       <Card
                         key={device.id}
                         className="p-3 cursor-pointer hover:bg-accent transition-colors"
@@ -391,7 +485,7 @@ const Index = () => {
                 <div className="mb-3">
                   <p className="text-xs text-muted-foreground mb-2 font-medium">Трёхфазные УЗО (3P)</p>
                   <div className="space-y-2">
-                    {DEVICE_LIBRARY.filter(d => d.type === 'rcd' && d.modules === 4).map((device) => (
+                    {filteredDevices.filter(d => d.type === 'rcd' && d.modules === 4).map((device) => (
                       <Card
                         key={device.id}
                         className="p-3 cursor-pointer hover:bg-accent transition-colors"
@@ -426,7 +520,7 @@ const Index = () => {
               </TabsContent>
               
               <TabsContent value="rcbo" className="space-y-2">
-                {DEVICE_LIBRARY.filter(d => d.type === 'rcbo').map((device) => (
+                {filteredDevices.filter(d => d.type === 'rcbo').map((device) => (
                   <Card
                     key={device.id}
                     className="p-3 cursor-pointer hover:bg-accent transition-colors"
@@ -529,8 +623,14 @@ const Index = () => {
                       {placedDevices.map((device, index) => (
                         <div
                           key={device.id}
-                          className={`p-4 rounded-lg border-2 transition-all cursor-pointer ${
-                            selectedDevice?.id === device.id
+                          draggable
+                          onDragStart={() => handleDragStart(index)}
+                          onDragOver={(e) => handleDragOver(e, index)}
+                          onDrop={(e) => handleDrop(e, index)}
+                          className={`p-4 rounded-lg border-2 transition-all cursor-move ${
+                            draggedIndex === index
+                              ? 'opacity-50 border-primary'
+                              : selectedDevice?.id === device.id
                               ? 'border-primary bg-primary/5'
                               : 'border-border hover:border-primary/50'
                           }`}
@@ -538,6 +638,9 @@ const Index = () => {
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
+                              <div className="flex flex-col items-center gap-1 text-muted-foreground cursor-grab active:cursor-grabbing">
+                                <Icon name="GripVertical" size={16} />
+                              </div>
                               <div className="flex items-center gap-2 text-muted-foreground text-sm font-mono">
                                 #{index + 1}
                               </div>
